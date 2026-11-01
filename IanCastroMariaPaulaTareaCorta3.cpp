@@ -219,9 +219,9 @@ int SacaCedula(string linealimpia){
 		cedu = cedu + linealimpia[i];
 		i++;
 	}
-	//int cedubuena = stoi(cedu);
-	//return cedubuena;
-	return cedu; // lo cambie para q lo sacara como string, pq salia como 1, en lugar de 01. Igual no creo q de problemas (si es q siquiera se ocupaba q saliera como int en primer lugar)
+	int cedubuena = stoi(cedu);
+	return cedubuena;
+	//return cedu; // lo cambie para q lo sacara como string, pq salia como 1, en lugar de 01. Igual no creo q de problemas (si es q siquiera se ocupaba q saliera como int en primer lugar)
 }
 
 
@@ -268,6 +268,8 @@ void LeerArchivoClientes(const char* nombreArchivo, ABBusqueda& arbol){
     rename("ClientesTemporal.txt", nombreArchivo);	
 	}
 
+
+/*
 void CreaIndice(const char* nombreClientes, const char* nombreIndices){
 	ifstream archivo(nombreClientes);
 	if (archivo.is_open() == false){
@@ -280,7 +282,7 @@ void CreaIndice(const char* nombreClientes, const char* nombreIndices){
 	
 }
 
-
+*/
 
 
 
