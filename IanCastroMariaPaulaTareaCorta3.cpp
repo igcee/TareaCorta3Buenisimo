@@ -285,7 +285,7 @@ void LeerArchivoClientes(const char* nombreArchivo, ABBusqueda& arbol) {
 	int cedula;
 	int pos = 0;
 
-	//getline(archivo, filaencabezado); // ignorar encabezado (Clientes.txt no tiene encabezado)
+	getline(archivo, filaencabezado); // ignorar encabezado
 	ofstream temp("ClientesTemporal.txt");
 	ABBusqueda arbolillorepe; // para revisar luego por cedulas repe
 	//bool cedulafin = false;
@@ -517,7 +517,98 @@ void BuscarCliente(ABBusqueda& arbol, Cache& cache, int cedula) {
 		<< " | Nombre: " << cache.nombre[espacio] << endl;
 }
 
+// =====================================================================
+//  PARTE 5: ELIMINAR
+// =====================================================================
 
+void MarcaBorrado(const char* nombreClientes, int pos) {
+	ifstream archivo(nombreClientes);
+	ofstream temp("ClientesMarca.txt");
+	string linea;
+	int actual = 0;
+
+	while (getline(archivo, linea)) {
+		if (actual == pos) {
+			linea = linea + ";1"; // le mete el ;1 a la linea, al puro final
+		}
+		temp << linea << endl;
+		actual++;
+	}
+	archivo.close();
+	temp.close();
+
+	remove(nombreClientes);
+	rename("ClientesMarca.txt", nombreClientes);
+}
+
+void EliminaDeCache(Cache& cache, int pos) {
+	int i = cache.BuscarPosicion(pos);
+	if (i == -1){
+		return;
+	}
+
+	while (i < cache.cantidad - 1) {
+		cache.posicion[i] = cache.posicion[i + 1];
+		cache.cedula[i] = cache.cedula[i + 1];
+		cache.nombre[i] = cache.nombre[i + 1];
+		i++;
+	}
+	cache.cantidad--;
+}
+
+void EliminarCliente(ABBusqueda& arbol, Cache& cache) {
+	int cedula;
+	cout << "Cedula del cliente a eliminar: ";
+	cin >> cedula;
+
+	int pos = arbol.BuscarPosicion(cedula);
+	if (pos == -1) {
+		cout << "El cliente no existe" << endl;
+		return;
+	}
+
+	MarcaBorrado("Clientes.txt", pos);
+	arbol.EliminarNodo(cedula);
+	EliminaDeCache(cache, pos);
+
+	cout << "Cliente " << cedula << " eliminado" << endl;
+}
+
+// =====================================================================
+//  PARTE 7: PURGAR
+// =====================================================================
+void Purgar(const char* nombreClientes) {
+	ifstream archivo(nombreClientes);
+	if (archivo.is_open() == false) {
+		cout << "No se pudo abrir el archivo " << nombreClientes << endl;
+		return;
+	}
+	ofstream temp("ClientesPurga.txt");
+	string linea;
+	bool hayBorrados = false;
+ 
+	while (getline(archivo, linea)) {
+		if (linea != "") {
+			if (EstaBorrado(linea)) {
+				hayBorrados = true;
+			}
+			else {
+				temp << linea << endl;
+			}
+		}
+	}
+	archivo.close();
+	temp.close();
+}
+// =====================================================================
+//  PARTE 7: REINDEXR
+// =====================================================================
+
+void Reindexar(ABBusqueda& arbol, Cache& cache) {
+	CreaIndice("Clientes.txt", "Indices.txt");
+	ConstruirArbol("Indices.txt", arbol);// ConstuirArb vacia antes de llenar x lo q se puede hacer de una
+	cache.Vaciar();
+}
 
 
 int main() {
@@ -534,6 +625,10 @@ int main() {
 		cout << endl << "1. Ver arbol (preorden)" << endl;
 		cout << "2. Ver cache" << endl;
 		cout << "3. Buscar cliente" << endl;
+		cout << "4. Eliminar cleinte" << endl;
+		cout << "5. Purgar" << endl;
+		cout << "6. Reindexar" << endl;
+		cout << "7. Insertar cliente" << endl;
 		cout << "0. Salir" << endl;
 		cout << "Opcion: ";
 		cin >> opcion;
@@ -551,6 +646,26 @@ int main() {
 			BuscarCliente(arbolillo, cache, cedula);
 			arbolillo.PreordenR();
 			cache.Mostrar();
+		}
+		else if (opcion == 4){
+			EliminarCliente(arbolillo, cache);
+			arbolillo.PreordenR();
+			cache.Mostrar();
+		}
+		else if (opcion == 5) {
+			Purgar("Clientes.txt");
+			arbolillo.PreordenR();
+			cache.Mostrar();
+		}
+		else if (opcion == 6) {
+			Reindexar(arbolillo, cache);
+			arbolillo.PreordenR();
+			cache.Mostrar();
+		}		
+		else if (opcion == 7) {
+			//InsertarCliente(arbolillo, cache);
+			//arbolillo.PreordenR();
+			//cache.Mostrar();
 		}
 	}
 
