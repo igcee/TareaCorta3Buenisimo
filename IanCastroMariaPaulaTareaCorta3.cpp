@@ -635,13 +635,13 @@ void InsertarCliente(ABBusqueda& arbol, Cache& cache) {
 		return;
 	}
 
-	int pos = ContarRegistros("Clientes.txt");      //indice del nuevo registro
+	int pos = ContarRegistros("Clientes.txt"); //indice del nuevo registro
 
-	ofstream archivo("Clientes.txt", ios::app);     //append al final del archivo
+	ofstream archivo("Clientes.txt", ios::app); //append al final del archivo
 	archivo << cedula << ";" << nombre << endl;
 	archivo.close();
 
-	arbol.InsertaNodo(cedula, pos);                 //se inserta en el arbol con su indice
+	arbol.InsertaNodo(cedula, pos);//se inserta en el arbol con su indice
 	CargaCacheInsercion(cache, "Clientes.txt", pos);
 
 	cout << "Cliente " << cedula << " insertado en el indice " << pos << endl;
@@ -672,6 +672,8 @@ void Purgar(const char* nombreClientes) {
 	}
 	archivo.close();
 	temp.close();
+	remove(nombreClientes);
+    rename("ClientesPurga.txt", nombreClientes);
 }
 // =====================================================================
 //  PARTE 7: REINDEXR
@@ -736,9 +738,9 @@ int main() {
 			cache.Mostrar();
 		}		
 		else if (opcion == 7) {
-			//InsertarCliente(arbolillo, cache);
-			//arbolillo.PreordenR();
-			//cache.Mostrar();
+			InsertarCliente(arbolillo, cache);
+			arbolillo.PreordenR();
+			cache.Mostrar();
 		}
 	}
 
