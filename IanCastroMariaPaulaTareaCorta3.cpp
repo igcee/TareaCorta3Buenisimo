@@ -310,15 +310,13 @@ void LeerArchivoClientes(const char* nombreArchivo, ABBusqueda& arbol) {
 	}
 	archivo.close();
 	temp.close();
-	// borra el archivo de clientes original (el sucio y con repe) y renombra el de clientes bueno (limpio y sin repe) al mismo nombre de ese
+	// borra el archivo de clientes original (el sucio y con repe) y renombra el de clientes bueno
 	remove(nombreArchivo);
 	rename("ClientesTemporal.txt", nombreArchivo);
 }
 
 
-// =====================================================================
-//  FUNCIONES AUXILIARES PARA LINEAS DE Clientes.txt
-// =====================================================================
+//  FUNCIONES AUXILIARES
 string QuitaRetorno(string linea) {
 	if (linea.size() > 0 && linea[linea.size() - 1] == '\r') {
 		linea.erase(linea.size() - 1);
@@ -326,7 +324,6 @@ string QuitaRetorno(string linea) {
 	return linea;
 }
 
-// "01;Francisco" -> "01"   (cedula como texto, para no perder el 0)
 string SacaCedulaTexto(string linea) {
 	string cedu = "";
 	int i = 0;
@@ -337,7 +334,6 @@ string SacaCedulaTexto(string linea) {
 	return cedu;
 }
 
-// "01;Francisco" -> "Francisco"   (tambien sirve con "01;Francisco;1")
 string SacaNombre(string linea) {
 	string nombre = "";
 	int i = 0;
@@ -352,7 +348,7 @@ string SacaNombre(string linea) {
 	return nombre;
 }
 
-// borrado = tiene un segundo ';' seguido de 1. Ejemplo: "01;Francisco;1"
+// borrado = tiene un segundo ';' seguido de 1
 bool EstaBorrado(string linea) {
 	int cantidadPuntoComa = 0;
 	int ultimo = -1;
@@ -366,9 +362,7 @@ bool EstaBorrado(string linea) {
 	return linea.substr(ultimo + 1) == "1";
 }
 
-// =====================================================================
-//  PARTE 2: INDEXAR Y SALVAR INDICES   (formato  indice;cedula)
-// =====================================================================
+//  PARTE 2: INDEXAR Y SALVAR INDICES
 void CreaIndice(const char* nombreClientes, const char* nombreIndices) {
 	ifstream clientes(nombreClientes);
 	if (clientes.is_open() == false) {
@@ -572,6 +566,85 @@ void EliminarCliente(ABBusqueda& arbol, Cache& cache) {
 	EliminaDeCache(cache, pos);
 
 	cout << "Cliente " << cedula << " eliminado" << endl;
+}
+
+// PARTE 6: INSERTAR
+//cuenta los registros del archivo 
+int ContarRegistros(const char* nombreClientes) {
+	ifstream archivo(nombreClientes);
+	string linea;
+	int cantidad = 0;
+	while (getline(archivo, linea)) {
+		linea = QuitaRetorno(linea);
+		if (linea.size() != 0) {
+			cantidad++;
+		}
+	}
+	archivo.close();
+	return cantidad;
+}
+
+//cache despues de insertar: el registro nuevo (de primero) + los 19 de amtes no borrados
+void CargaCacheInsercion(Cache& cache, const char* nombreClientes, int posNueva) {
+	ifstream archivo(nombreClientes);
+	if (archivo.is_open() == false) {
+		cout << "No se pudo abrir el archivo " << nombreClientes << endl;
+		return;
+	}
+	vector<string> lineas;
+	string linea;
+	while (getline(archivo, linea)) {
+		linea = QuitaRetorno(linea);
+		if (linea.size() == 0) continue;
+		lineas.push_back(linea);
+	}
+	archivo.close();
+
+	int total = lineas.size();
+	cache.cantidad = 0;
+	int i = posNueva;     //empieza en el nuevo y camina hacia atras (circular)
+	int visitados = 0;
+
+	while (cache.cantidad < TAM_CACHE && visitados < total) {
+		if (EstaBorrado(lineas[i]) == false) {
+			cache.posicion[cache.cantidad] = i;
+			cache.cedula[cache.cantidad] = SacaCedulaTexto(lineas[i]);
+			cache.nombre[cache.cantidad] = SacaNombre(lineas[i]);
+			cache.cantidad++;
+		}
+		i = (i - 1 + total) % total;
+		visitados++;
+	}
+}
+
+void InsertarCliente(ABBusqueda& arbol, Cache& cache) {
+	int cedula;
+	string nombre;
+	cout << "Cedula del nuevo cliente: ";
+	cin >> cedula;
+	cout << "Nombre del nuevo cliente: ";
+	cin >> ws;
+	getline(cin, nombre);
+
+	if (arbol.BuscarPosicion(cedula) != -1) {
+		cout << "La cedula " << cedula << " ya existe, no se permiten repetidas" << endl;
+		return;
+	}
+	if (nombre.size() == 0 || nombre.find(';') != string::npos) {
+		cout << "Nombre invalido" << endl;
+		return;
+	}
+
+	int pos = ContarRegistros("Clientes.txt");      //indice del nuevo registro
+
+	ofstream archivo("Clientes.txt", ios::app);     //append al final del archivo
+	archivo << cedula << ";" << nombre << endl;
+	archivo.close();
+
+	arbol.InsertaNodo(cedula, pos);                 //se inserta en el arbol con su indice
+	CargaCacheInsercion(cache, "Clientes.txt", pos);
+
+	cout << "Cliente " << cedula << " insertado en el indice " << pos << endl;
 }
 
 // =====================================================================
