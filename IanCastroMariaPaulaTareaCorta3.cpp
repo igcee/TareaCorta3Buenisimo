@@ -291,20 +291,20 @@ void LeerArchivoClientes(const char* nombreArchivo, ABBusqueda& arbol) {
 	//bool cedulafin = false;
 
 	while (getline(archivo, lineasucia)) { // lineasucia tendria, por ejemplo, "01;Francisco            clientes sin repetidos "
-		cout << "Linea actual: " << lineasucia << endl;
+		//cout << "Linea actual: " << lineasucia << endl;
 		linealimpia = LimpiaLinea(lineasucia); // linealimpia tendria, por ejemplo, "01;Francisco"
-		cout << "Linea actual despues de limpiar: " << linealimpia << endl;
+		//cout << "Linea actual despues de limpiar: " << linealimpia << endl;
 		//cout << linealimpia << endl; //test
 		cedula = SacaCedula(linealimpia);
-		cout << "Cedula de la linea actual: " << cedula << endl;
+		//cout << "Cedula de la linea actual: " << cedula << endl;
 		if (arbolillorepe.Buscarvalor(cedula) == false) { // si esa cedula ya estaba en el arbol, eso significa q esta repetida, x lo q no se mete
 			arbolillorepe.InsertaNodo(cedula);
-			cout << "Como la cedula " << cedula << " no esta repetida, se inserta en archivo nuevo" << endl;
+			//cout << "Como la cedula " << cedula << " no esta repetida, se inserta en archivo nuevo" << endl;
 
 			temp << linealimpia << endl; // esto es para meter esa linea en el archivo de clientes bueno, osea limpio Y sin repe
 		}
 		else {
-			cout << "Cedula " << cedula << " repetida, no se inserta en archivo nuevo" << endl;
+			//cout << "Cedula " << cedula << " repetida, no se inserta en archivo nuevo" << endl;
 		}
 
 	}
@@ -400,8 +400,8 @@ void ConstruirArbol(const char* nombreIndices, ABBusqueda& arbol) {
 	while (getline(indices, linea)) {
 		linea = QuitaRetorno(linea);
 		if (linea.size() == 0) continue;
-		int pos = stoi(SacaCedulaTexto(linea));   // antes del ';' = indice
-		int cedula = stoi(SacaNombre(linea));     // despues del ';' = cedula
+		int pos = stoi(SacaCedulaTexto(linea));// antes del ';' = indice
+		int cedula = stoi(SacaNombre(linea));// despues del ';' = cedula
 		arbol.InsertaNodo(cedula, pos);
 	}
 	indices.close();
@@ -602,7 +602,7 @@ void CargaCacheInsercion(Cache& cache, const char* nombreClientes, int posNueva)
 
 	int total = lineas.size();
 	cache.cantidad = 0;
-	int i = posNueva;     //empieza en el nuevo y camina hacia atras (circular)
+	int i = posNueva;//empieza en el nuevo y camina hacia atras (circular)
 	int visitados = 0;
 
 	while (cache.cantidad < TAM_CACHE && visitados < total) {
@@ -640,6 +640,10 @@ void InsertarCliente(ABBusqueda& arbol, Cache& cache) {
 	ofstream archivo("Clientes.txt", ios::app); //append al final del archivo
 	archivo << cedula << ";" << nombre << endl;
 	archivo.close();
+	
+	ofstream indices("Indices.txt", ios::app);// meter cambio de insertar en indices.txt
+	indices << pos << ";" << cedula << endl;
+	indices.close();
 
 	arbol.InsertaNodo(cedula, pos);//se inserta en el arbol con su indice
 	CargaCacheInsercion(cache, "Clientes.txt", pos);

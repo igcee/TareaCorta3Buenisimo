@@ -2,9 +2,8 @@
 02;Jose
 03;Kevin
 04;Mario
-101;Francisco;1
+101;Francisco
 102;Jose
-13;Kevin
 14;Mario
 32;Michael
 151;Francisco
@@ -59,3 +58,4 @@
 412;Álvaro
 439;Manuel
 934;Juan
+5000;Ana
